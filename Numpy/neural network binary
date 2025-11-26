@@ -1,0 +1,86 @@
+#Neural network for Xor gate
+
+import numpy as np
+
+class Neural_Network:
+
+    def __init__(self,x,y,input,hidden,output,learning_rate):
+        self.input=input
+        self.hidden=hidden
+        self.output=output
+        self.x=x
+        self.y=y
+        self.learning_rate=learning_rate
+
+    def sigmoid(self,a):
+        return 1/(1+np.exp(-a))
+    
+    def sigmoid_derivative(self,a):
+        self.a=a
+        return self.a*(1-self.a)
+    
+    def layers(self):
+        self.hidden_weights=np.random.randn(self.input,self.hidden)
+        self.hidden_bias=np.random.randn(1,self.hidden)
+        self.output_weights=np.random.randn(self.hidden,self.output)
+        self.output_bias=np.random.randn(1,self.output)
+    
+    def initial(self):
+        self.hidden_output=np.dot(self.x,self.hidden_weights)+self.hidden_bias
+        self.sigmoid1=self.sigmoid(self.hidden_output)
+
+        self.final_output=np.dot(self.sigmoid1,self.output_weights)+self.output_bias
+        self.sigmoid2=self.sigmoid(self.final_output)
+
+        return [self.sigmoid1,self.sigmoid2]
+    
+    def error(self):
+        self.errors=self.y-self.sigmoid2
+
+        self.herror=np.dot(self.errors,self.output_weights.T)
+
+    def output_error(self):
+        return self.errors
+    
+    def hidden_error(self):
+        return self.herror
+
+
+    def backpropogation(self,o,h):
+        self.o=o
+        self.h=h
+        self.hidden_weights += self.learning_rate*np.dot(self.x.T,self.h)
+        self.hidden_bias += self.learning_rate*np.sum(self.h,axis=0,keepdims=True)
+
+        self.output_weights += self.learning_rate*np.dot(self.sigmoid1.T,self.o)
+        self.output_bias += self.learning_rate*np.sum(self.o,axis=0,keepdims=True)
+
+    def testing(self,k):
+        self.k=np.array(k)
+
+        self.hidden_output=np.dot(self.hidden_weights,self.k)+self.hidden_bias
+        self.sigmoid1=self.sigmoid(self.hidden_output)
+
+        self.final_output=np.dot(self.sigmoid1,self.output_weights)+self.output_bias
+        self.sigmoid2=self.sigmoid(self.final_output)
+        
+        return self.sigmoid2
+
+#xor gate
+data=np.array([[0,0],[0,1],[1,0],[1,1]])
+answer=np.array([[0],[1],[1],[0]])
+epotch=100000
+
+model=Neural_Network(input=2,output=1,hidden=2,x=data,y=answer,learning_rate=0.001)
+
+np.random.seed(42)
+model.layers()
+for i in range(epotch):
+    a=model.initial()
+    
+    model.error()
+    h=model.sigmoid_derivative(a[0])*model.hidden_error()
+    o=model.sigmoid_derivative(a[1])*model.output_error()
+
+    model.backpropogation(o=o,h=h)
+print(model.initial())
