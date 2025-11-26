@@ -1,0 +1,4 @@
+numpy            
+idx2numpy
+torch == 2.4.1
+matplotlib
